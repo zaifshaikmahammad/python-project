@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}Monthly Expense Reports &bull; Personal Expense Tracking and Analysis System{% endblock %}
+{% block page_title %}Monthly Expense Reports{% endblock %}
+{% block page_subtitle %}Generate itemized monthly expenditure statements and category distributions{% endblock %}
+
+{% block extra_header_actions %}
+<button type="button" class="btn btn-secondary" id="btnPrintReport">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+    Print / Export Statement
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Month Selector Toolbar -->
+<div class="filter-toolbar">
+    <form action="{{ url_for('monthly_reports') }}" method="GET" class="filter-form" style="align-items: center;">
+        <div class="filter-group">
+            <label for="select_month" style="font-size: 13px;">Select Statement Month:</label>
+            <select id="select_month" name="month" class="form-select" onchange="this.form.submit()" style="font-weight: 600;">
+                {% if available_months %}
+                    {% for m in available_months %}
+                        <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>
+                            {{ m }}
+                        </option>
+                    {% endfor %}
+                {% else %}
+                    <option value="">No Monthly Data</option>
+                {% endif %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="padding: 8px 14px;">
+            Load Report
+        </button>
+    </form>
+</div>
+
+{% if report %}
+<!-- Report Summary Header Card -->
+<div class="card-section" style="padding: 24px; margin-bottom: 24px; background: #ffffff;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px;">
+        <div>
+            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--primary); font-weight: 700;">Monthly Expenditure Report</span>
+            <h2 style="font-size: 24px; font-weight: 800; color: var(--text-main); margin-top: 4px;">{{ report.month_name }}</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Generated on {{ today_date }} &bull; Personal Expense Tracking and Analysis System</p>
+        </div>
+        <div style="text-align: right;">
+            <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Total Monthly Outflow</span>
+            <div style="font-size: 28px; font-weight: 800; color: var(--primary);">{{ "%.2f"|format(report.total_spent) }}</div>
+        </div>
+    </div>
+
+    <!-- 4 Key Month Metrics -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <div style="background: #f8fafc; padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Transactions</span>
+            <div style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-top: 2px;">{{ report.transaction_count }} entries</div>
+        </div>
+        <div style="background: #f8fafc; padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Active Days</span>
+            <div style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-top: 2px;">{{ report.unique_days }} days logged</div>
+        </div>
+        <div style="background: #f8fafc; padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Daily Average</span>
+            <div style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-top: 2px;">{{ "%.2f"|format(report.daily_average) }} / day</div>
+        </div>
+        <div style="background: #f8fafc; padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Highest Category</span>
+            <div style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-top: 2px;">
+                {% if report.highest_category %}
+                    {{ report.highest_category.name }} ({{ report.highest_category.percentage }}%)
+                {% else %}
+                    N/A
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Month's Category Breakdown & Mini Donut Chart -->
+<div style="display: grid; grid-template-columns: 3fr 2fr; gap: 24px; margin-bottom: 24px;">
+    <!-- Category Breakdown Table -->
+    <div class="card-section">
+        <div class="section-header">
+            <h3 class="section-title">Category Spending in {{ report.month_name }}</h3>
+            <span class="chart-badge">Percentage Breakdown</span>
+        </div>
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Entries</th>
+                        <th style="text-align: right;">Amount</th>
+                        <th style="text-align: right;">Share</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in report.category_summary %}
+                    <tr>
+                        <td><strong>{{ cat.category_name }}</strong></td>
+                        <td>{{ cat.count }}</td>
+                        <td style="text-align: right;" class="amount-text">{{ "%.2f"|format(cat.total_amount) }}</td>
+                        <td style="text-align: right; font-weight: 600;">{{ cat.percentage }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Monthly Chart -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Monthly Category Distribution</h3>
+            <span class="chart-badge">Matplotlib</span>
+        </div>
+        <div class="chart-image-wrap">
+            <img src="{{ report.chart }}" alt="Category distribution for {{ report.month_name }}">
+        </div>
+    </div>
+</div>
+
+<!-- Itemized Transaction Statement -->
+<div class="card-section">
+    <div class="section-header">
+        <h3 class="section-title">Itemized Transactions for {{ report.month_name }}</h3>
+        <span style="font-size: 13px; color: var(--text-muted);">{{ report.transaction_count }} records</span>
+    </div>
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th style="width: 120px;">Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Payment Method</th>
+                    <th style="text-align: right;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in report.transactions %}
+                <tr>
+                    <td style="color: var(--text-muted); font-size: 13px;">{{ tx.expense_date }}</td>
+                    <td><strong>{{ tx.description }}</strong></td>
+                    <td><span class="badge-category">{{ tx.category_name }}</span></td>
+                    <td><span class="badge-method">{{ tx.payment_method }}</span></td>
+                    <td style="text-align: right;" class="amount-text">{{ "%.2f"|format(tx.amount) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% else %}
+<div class="card-section">
+    <div class="empty-state">
+        <div class="empty-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        </div>
+        <h4 class="empty-title">No Monthly Report Available</h4>
+        <p class="empty-desc">There are no expense records recorded yet to generate a monthly report. Add expenses to get started.</p>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('openAddExpenseModal').click()">
+            + Record Expense
+        </button>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

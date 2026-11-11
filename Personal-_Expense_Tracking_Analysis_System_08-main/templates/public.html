@@ -1,0 +1,57 @@
+{% extends 'public_base.html' %}
+{% block content %}
+{% if page|lower == 'features' %}
+<section class="preview-section public-preview-page">
+  <div class="preview-heading">
+    <span class="eyebrow">FEATURE PREVIEW</span>
+    <h2>See how the features come together.</h2>
+    <p>{{ subtitle }} {{ body }}</p>
+  </div>
+  <div class="preview-grid preview-grid-three">
+    <article class="preview-card">
+      <img src="{{ url_for('static', filename='images/expense-ledger.svg') }}" alt="Searchable expense ledger interface" loading="lazy">
+      <div><h3>Searchable expense ledger</h3><p>Filter by date, category, or keyword. Review matching totals, update a transaction, and keep the full history organized.</p></div>
+    </article>
+    <article class="preview-card">
+      <img src="{{ url_for('static', filename='images/analytics-dashboard.svg') }}" alt="Analytics interface with category and monthly charts" loading="lazy">
+      <div><h3>Visual analytics</h3><p>Compare category shares, monthly spending trends, averages, and payment methods to spot useful patterns.</p></div>
+    </article>
+    <article class="preview-card">
+      <img src="{{ url_for('static', filename='images/monthly-report.svg') }}" alt="Monthly report interface" loading="lazy">
+      <div><h3>Monthly statements</h3><p>Bring monthly totals, category breakdowns, and transactions together in a clear report you can print.</p></div>
+    </article>
+  </div>
+</section>
+{% elif page|lower == 'about' %}
+<section class="preview-section public-preview-page about-preview-page">
+  <div class="preview-heading">
+    <h2>Designed around your everyday spending.</h2>
+    <p>{{ subtitle }} {{ body }}</p>
+  </div>
+  <div class="preview-grid preview-grid-two">
+    <article class="preview-card">
+      <img src="{{ url_for('static', filename='images/expense-ledger.svg') }}" alt="Expense ledger with filters, totals and transaction actions" loading="lazy">
+      <div><h3>One organized spending history</h3><p>Keep dates, amounts, categories, descriptions, and payment methods together. Search the ledger or filter it to answer everyday questions quickly.</p></div>
+    </article>
+    <article class="preview-card">
+      <img src="{{ url_for('static', filename='images/analytics-dashboard.svg') }}" alt="Expense analytics with category donut chart and month-wise bar chart" loading="lazy">
+      <div><h3>Useful insights and reports</h3><p>See category distribution, monthly changes, and summary statistics, then review a print-friendly monthly statement.</p></div>
+    </article>
+  </div>
+</section>
+{% elif page|lower == 'contact' %}
+<section class="simple-public">
+  <span class="eyebrow">PERSONAL EXPENSE TRACKER / CONTACT</span>
+  <h1>Contact<em>.</em></h1>
+  <h2>We'd love to hear from you.</h2>
+  <p>Reach out to the Personal Expense Tracker and Analysis System team.</p>
+  <div class="contact-intro"><span class="contact-spark">✳</span><div><strong>Let's make money management simpler.</strong><small>Questions, feedback or ideas? Choose the easiest way to reach us.</small></div></div>
+  <div class="contact-grid">
+    <article class="contact-card phone-card"><div class="contact-icon" aria-hidden="true">☎</div><div class="contact-meta">PHONE LINE 01</div><h3>Give us a call</h3><a class="contact-link" href="tel:+911181081276">+91 1181081276 <span>↗</span></a><p>For a quick conversation or project enquiry.</p></article>
+    <article class="contact-card phone-card"><div class="contact-icon" aria-hidden="true">☎</div><div class="contact-meta">PHONE LINE 02</div><h3>Another way to reach us</h3><a class="contact-link" href="tel:+911409610816">+91 1409610816 <span>↗</span></a><p>We're happy to hear your suggestions.</p></article>
+    <article class="contact-card email-card"><div class="contact-icon" aria-hidden="true">✉</div><div class="contact-meta">EMAIL ADDRESS 01</div><h3>Send us an email</h3><a class="contact-link" href="mailto:pachipalapardhu@gmail.com">pachipalapardhu@gmail.com <span>↗</span></a><p>Share your questions and feedback anytime.</p></article>
+    <article class="contact-card email-card"><div class="contact-icon" aria-hidden="true">✉</div><div class="contact-meta">EMAIL ADDRESS 02</div><h3>Stay in touch</h3><a class="contact-link" href="mailto:dhanushjuturu16@gmail.com">dhanushjuturu16@gmail.com <span>↗</span></a><p>We'd love to hear what you think.</p></article>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

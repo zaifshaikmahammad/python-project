@@ -1,0 +1,26 @@
+{% extends 'public_base.html' %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <span class="eyebrow">MONEY, MADE CLEARER</span>
+    <h1>Make every<br><em>rupee count.</em></h1>
+    <p>Track your daily spending, spot patterns, and build better money habits with one bright, simple dashboard.</p>
+    <div class="hero-actions">
+      <a class="btn btn-dark" href="{{ url_for('register') }}">Create your account ↗</a>
+      <a class="btn btn-light" href="{{ url_for('login') }}">Log in</a>
+      <a class="btn btn-secondary" href="{{ url_for('demo') }}">Explore the demo</a>
+    </div>
+    <div class="hero-note">✳ No account needed · Sample data only · Read-only demo</div>
+  </div>
+  <div class="hero-art">
+    <div class="art-card card-one"><small>MONTHLY SPENDING</small><strong>₹12,450</strong><span>↓ Know where it goes</span></div>
+    <div class="art-orbit">₹</div>
+    <div class="art-card card-two"><b>✦</b><span>Spend smarter<br>every day.</span></div>
+  </div>
+</section>
+<section class="public-features">
+  <article><b>01 / TRACK</b><h3>Every expense, in one place.</h3><p>Log purchases and organize them by category.</p></article>
+  <article><b>02 / UNDERSTAND</b><h3>Insights that make sense.</h3><p>Explore category shares and monthly trends.</p></article>
+  <article><b>03 / IMPROVE</b><h3>Build better habits.</h3><p>Use reports to make informed decisions.</p></article>
+</section>
+{% endblock %}

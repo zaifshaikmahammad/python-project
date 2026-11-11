@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Categories &bull; Personal Expense Tracking and Analysis System{% endblock %}
+{% block page_title %}Expense Categories{% endblock %}
+{% block page_subtitle %}Classify expenses to organize your spending into meaningful buckets{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px;">
+    <!-- Add New Category Card -->
+    {% if not is_demo %}<div class="card-section" style="height: fit-content;">
+        <div class="section-header">
+            <h3 class="section-title">Add New Category</h3>
+        </div>
+        <form action="{{ url_for('add_category') }}" method="POST" style="padding: 24px;">
+            <div class="form-group">
+                <label class="form-label">Category Name *</label>
+                <input type="text" name="category_name" class="form-input" placeholder="e.g. Travel & Vacations" required maxlength="100">
+                <span class="form-hint">Unique descriptive name for categorizing transactions</span>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
+                Save Category
+            </button>
+        </form>
+    </div>{% endif %}
+
+    <!-- Existing Categories List -->
+    <div class="card-section">
+        <div class="section-header">
+            <h3 class="section-title">Active Categories</h3>
+            <span style="font-size: 13px; color: var(--text-muted);">{{ categories|length }} Categories Total</span>
+        </div>
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th>Category Name</th>
+                        <th style="text-align: center;">Expenses Count</th>
+                        <th style="text-align: right;">Total Amount</th>
+                        <th style="text-align: center; width: 80px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in categories %}
+                    <tr>
+                        <td style="color: var(--text-muted); font-size: 12px;">#{{ cat.category_id }}</td>
+                        <td>
+                            <strong style="color: var(--text-main);">{{ cat.category_name }}</strong>
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="badge-method">{{ cat.expense_count }} items</span>
+                        </td>
+                        <td style="text-align: right;" class="amount-text">
+                            {{ "%.2f"|format(cat.total_amount) }}
+                        </td>
+                        <td style="text-align: center;">
+                            {% if cat.expense_count == 0 %}
+                            <form action="{{ url_for('delete_category', category_id=cat.category_id) }}" method="POST" onsubmit="return confirm('Delete this unused category?');">
+                                <button type="submit" class="btn-icon delete" title="Delete Category">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </form>
+                            {% else %}
+                            <span title="Linked to active expenses. Reassign or delete expenses first." style="color: #cbd5e1; cursor: not-allowed; font-size: 11px;">
+                                Locked
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

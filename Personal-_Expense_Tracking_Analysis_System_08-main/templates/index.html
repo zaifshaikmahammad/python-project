@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard &bull; Personal Expense Tracking and Analysis System{% endblock %}
+{% block page_title %}Financial Dashboard{% endblock %}
+{% block page_subtitle %}Overview of your monthly expenditure and category-wise spending patterns{% endblock %}
+
+{% block content %}
+<section class="dashboard-greeting"><span>{{ time_greeting }}</span><h1>{{ user_name }}!</h1></section>
+<!-- KPI Summary Cards -->
+<div class="kpi-grid">
+    <!-- Card 1: Total Spending -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-label">Total Expenditure</span>
+            <div class="kpi-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+        </div>
+        <div class="kpi-value">{{ "%.2f"|format(total_expenses) }}</div>
+        <div class="kpi-subtext">
+            <span>Cumulative recorded spending</span>
+        </div>
+    </div>
+
+    <!-- Card 2: This Month's Spending -->
+    <div class="kpi-card emerald">
+        <div class="kpi-header">
+            <span class="kpi-label">This Month's Spending</span>
+            <div class="kpi-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </div>
+        </div>
+        <div class="kpi-value">{{ "%.2f"|format(current_month_total) }}</div>
+        <div class="kpi-subtext">
+            <span>Active calendar month total</span>
+        </div>
+    </div>
+
+    <!-- Card 3: Highest Spending Category -->
+    <div class="kpi-card amber">
+        <div class="kpi-header">
+            <span class="kpi-label">Highest Expense Category</span>
+            <div class="kpi-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </div>
+        </div>
+        <div class="kpi-value" style="font-size: 20px;">
+            {% if highest_category %}
+                {{ highest_category.name }}
+            {% else %}
+                N/A
+            {% endif %}
+        </div>
+        <div class="kpi-subtext">
+            {% if highest_category %}
+                <strong>{{ "%.2f"|format(highest_category.amount) }}</strong> ({{ highest_category.percentage }}% of total)
+            {% else %}
+                No data available
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Card 4: Daily Average / Total Entries -->
+    <div class="kpi-card purple">
+        <div class="kpi-header">
+            <span class="kpi-label">Average Transaction</span>
+            <div class="kpi-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            </div>
+        </div>
+        <div class="kpi-value">{{ "%.2f"|format(summary_stats.mean) }}</div>
+        <div class="kpi-subtext">
+            Across <strong>{{ transaction_count }}</strong> recorded expenses
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section: Matplotlib Generated Visualizations -->
+<div class="charts-grid">
+    <!-- Chart 1: Category Pie Chart -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Category Spending Share</h3>
+            <span class="chart-badge">Matplotlib Pie/Donut</span>
+        </div>
+        <div class="chart-image-wrap chart-canvas-wrap"><canvas id="categoryChart" aria-label="Interactive category spending chart"></canvas></div>
+        <div class="chart-detail" id="categoryChartDetail" aria-live="polite">Select a slice to see its percentage.</div>
+    </div>
+
+    <!-- Chart 2: Month-Wise Bar Chart -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Monthly Spending Trends</h3>
+            <span class="chart-badge">Matplotlib Bar Chart</span>
+        </div>
+        <div class="chart-image-wrap chart-canvas-wrap"><canvas id="monthlyChart" aria-label="Interactive monthly spending chart"></canvas></div>
+        <div class="chart-detail" id="monthlyChartDetail" aria-live="polite">Select a bar to see its share of total spending.</div>
+    </div>
+</div>
+
+<!-- Recent Expenses Table & Top Category Share -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Recent Transactions Table -->
+    <div class="card-section">
+        <div class="section-header">
+            <h3 class="section-title">Recent Expenses</h3>
+            <a href="{{ url_for('expenses_list') }}" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">
+                View All Ledger &rarr;
+            </a>
+        </div>
+        
+        {% if recent_expenses %}
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Method</th>
+                        <th style="text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exp in recent_expenses %}
+                    <tr>
+                        <td style="color: var(--text-muted); font-size: 13px;">{{ exp.expense_date }}</td>
+                        <td><strong>{{ exp.description }}</strong></td>
+                        <td><span class="badge-category">{{ exp.category_name }}</span></td>
+                        <td><span class="badge-method">{{ exp.payment_method }}</span></td>
+                        <td style="text-align: right;" class="amount-text">{{ "%.2f"|format(exp.amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            </div>
+            <h4 class="empty-title">No Expenses Logged Yet</h4>
+            <p class="empty-desc">Start adding your expenses to see detailed analytics, charts, and monthly totals.</p>
+            <button type="button" class="btn btn-primary" onclick="document.getElementById('openAddExpenseModal').click()">
+                + Record First Expense
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Top Categories Quick Progress List -->
+    <div class="card-section">
+        <div class="section-header">
+            <h3 class="section-title">Top Categories</h3>
+            <a href="{{ url_for('analytics_view') }}" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">Details</a>
+        </div>
+        <div style="padding: 20px;">
+            {% if category_breakdown %}
+                {% for cat in category_breakdown %}
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                        <span style="font-weight: 600;">{{ cat.category_name }}</span>
+                        <span style="color: var(--text-muted); font-weight: 700;">{{ "%.2f"|format(cat.total_amount) }} ({{ cat.percentage }}%)</span>
+                    </div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" style="width: {{ cat.percentage }}%;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-muted); font-size: 13px;">No category data available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+const catLabels={{ category_breakdown|map(attribute='category_name')|list|tojson }};
+const catValues={{ category_breakdown|map(attribute='total_amount')|list|tojson }};
+const monthLabels={{ monthly_chart_data|map(attribute='month_name')|list|tojson }};
+const monthValues={{ monthly_chart_data|map(attribute='total_amount')|list|tojson }};
+const palette=['#ff705e','#c7f464','#ffbf69','#8ecae6','#b8a1ff','#f4a6c8','#9bd3ae'];
+function chartDetail(el,label,value,total){el.textContent=label+' · ₹'+Number(value).toLocaleString('en-IN')+' · '+(total?((value/total)*100).toFixed(1):'0.0')+'% of total';}
+if(window.Chart && catLabels.length){const total=catValues.reduce((a,b)=>a+Number(b),0);new Chart(document.getElementById('categoryChart'),{type:'doughnut',data:{labels:catLabels,datasets:[{data:catValues,backgroundColor:palette,borderColor:'#171717',borderWidth:2,hoverOffset:18,offset:0}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:450},onClick:(e,items,chart)=>{if(items.length){const i=items[0].index;chartDetail(document.getElementById('categoryChartDetail'),catLabels[i],catValues[i],total);chart.setActiveElements([{datasetIndex:0,index:i}]);chart.update();}},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>`${c.label}: ₹${Number(c.raw).toLocaleString('en-IN')} (${(c.raw/total*100).toFixed(1)}%)`}}}}});}
+if(window.Chart && monthLabels.length){const total=monthValues.reduce((a,b)=>a+Number(b),0);new Chart(document.getElementById('monthlyChart'),{type:'bar',data:{labels:monthLabels,datasets:[{label:'Spending',data:monthValues,backgroundColor:'#ff705e',borderColor:'#171717',borderWidth:2,borderRadius:7,hoverBackgroundColor:'#c7f464'}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:450},onClick:(e,items,chart)=>{if(items.length){const i=items[0].index;chartDetail(document.getElementById('monthlyChartDetail'),monthLabels[i],monthValues[i],total);chart.setActiveElements([{datasetIndex:0,index:i}]);chart.update();}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`₹${Number(c.raw).toLocaleString('en-IN')} (${(c.raw/total*100).toFixed(1)}%)`}}},scales:{y:{beginAtZero:true,grid:{color:'#e8e1d5'}},x:{grid:{display:false}}}}});}
+</script>
+{% endblock %}

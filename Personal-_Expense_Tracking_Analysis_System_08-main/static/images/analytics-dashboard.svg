@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+<rect width="1200" height="760" rx="28" fill="#fffaf1"/>
+<rect x="0" y="0" width="1200" height="760" rx="28" fill="#fffaf1"/>
+<rect x="0" y="0" width="245" height="760" rx="28" fill="#191919"/>
+<text x="38" y="62" font-family="Arial,sans-serif" font-size="28" font-weight="700" fill="#fff">₹ spendwise.</text>
+<text x="38" y="135" font-family="Arial,sans-serif" font-size="17" fill="#bdbdbd">OVERVIEW</text>
+<text x="38" y="185" font-family="Arial,sans-serif" font-size="19" fill="#fff">▦  Dashboard</text>
+<text x="38" y="238" font-family="Arial,sans-serif" font-size="19" fill="#bdbdbd">▤  Expenses</text>
+<text x="38" y="291" font-family="Arial,sans-serif" font-size="19" fill="#bdbdbd">◷  Analytics</text>
+<text x="38" y="344" font-family="Arial,sans-serif" font-size="19" fill="#bdbdbd">▧  Reports</text>
+<text x="292" y="75" font-family="Arial,sans-serif" font-size="34" font-weight="700" fill="#191919">Your money, at a glance</text>
+<text x="292" y="112" font-family="Arial,sans-serif" font-size="17" fill="#777">A clear picture of your everyday spending</text>
+<rect x="292" y="150" width="260" height="130" rx="18" fill="#fff" stroke="#eee2d4"/>
+<rect x="570" y="150" width="260" height="130" rx="18" fill="#fff" stroke="#eee2d4"/>
+<rect x="848" y="150" width="300" height="130" rx="18" fill="#fff" stroke="#eee2d4"/>
+<text x="320" y="190" font-family="Arial,sans-serif" font-size="16" fill="#777">TOTAL SPENDING</text>
+<text x="320" y="242" font-family="Arial,sans-serif" font-size="36" font-weight="700" fill="#191919">₹24,850</text>
+<text x="598" y="190" font-family="Arial,sans-serif" font-size="16" fill="#777">THIS MONTH</text>
+<text x="598" y="242" font-family="Arial,sans-serif" font-size="36" font-weight="700" fill="#191919">₹8,420</text>
+<text x="876" y="190" font-family="Arial,sans-serif" font-size="16" fill="#777">TRANSACTIONS</text>
+<text x="876" y="242" font-family="Arial,sans-serif" font-size="36" font-weight="700" fill="#191919">36</text>
+
+<rect x="292" y="310" width="410" height="390" rx="18" fill="#fff" stroke="#eee2d4"/>
+<rect x="720" y="310" width="428" height="390" rx="18" fill="#fff" stroke="#eee2d4"/>
+<text x="324" y="358" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#191919">Spending by category</text>
+<circle cx="493" cy="520" r="112" fill="none" stroke="#f0b66d" stroke-width="42"/>
+<circle cx="493" cy="520" r="112" fill="none" stroke="#8cc8a7" stroke-width="42" stroke-dasharray="210 494" transform="rotate(-90 493 520)"/>
+<circle cx="493" cy="520" r="112" fill="none" stroke="#9bb6df" stroke-width="42" stroke-dasharray="115 589" stroke-dashoffset="-210" transform="rotate(-90 493 520)"/>
+<text x="493" y="515" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#777">TOTAL</text>
+<text x="493" y="550" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" font-weight="700" fill="#191919">₹8,420</text>
+<text x="752" y="358" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#191919">Monthly spending</text>
+<line x1="770" y1="620" x2="1105" y2="620" stroke="#ddd"/>
+<line x1="770" y1="430" x2="770" y2="620" stroke="#ddd"/>
+<rect x="800" y="530" width="30" height="90" rx="7" fill="#e9a85e"/><text x="815" y="654" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#777">Jan</text><rect x="852" y="485" width="30" height="135" rx="7" fill="#e9a85e"/><text x="867" y="654" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#777">Feb</text><rect x="904" y="508" width="30" height="112" rx="7" fill="#e9a85e"/><text x="919" y="654" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#777">Mar</text><rect x="956" y="455" width="30" height="165" rx="7" fill="#e9a85e"/><text x="971" y="654" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#777">Apr</text><rect x="1008" y="475" width="30" height="145" rx="7" fill="#e9a85e"/><text x="1023" y="654" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#777">May</text><rect x="1060" y="430" width="30" height="190" rx="7" fill="#e9a85e"/><text x="1075" y="654" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#777">Jun</text></svg>

@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Expenses Ledger &bull; Personal Expense Tracking and Analysis System{% endblock %}
+{% block page_title %}Expenses Ledger{% endblock %}
+{% block page_subtitle %}Manage, search, filter and track all recorded personal expenses{% endblock %}
+
+{% block content %}
+<!-- Filter Toolbar -->
+<div class="filter-toolbar">
+    <form action="{{ url_for('expenses_list') }}" method="GET" class="filter-form">
+        <!-- Start Date Filter -->
+        <div class="filter-group">
+            <label for="filter_start">From:</label>
+            <input type="date" id="filter_start" name="start_date" class="form-input" value="{{ start_date }}">
+        </div>
+
+        <!-- End Date Filter -->
+        <div class="filter-group">
+            <label for="filter_end">To:</label>
+            <input type="date" id="filter_end" name="end_date" class="form-input" value="{{ end_date }}">
+        </div>
+
+        <!-- Category Dropdown Filter -->
+        <div class="filter-group">
+            <label for="filter_category">Category:</label>
+            <select id="filter_category" name="category_id" class="form-select">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.category_id }}" {% if selected_category == cat.category_id %}selected{% endif %}>
+                        {{ cat.category_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Search Keyword Filter -->
+        <div class="filter-group">
+            <label for="filter_search">Search:</label>
+            <input type="text" id="filter_search" name="search" class="form-input" placeholder="Description or method..." value="{{ search }}" style="width: 170px;">
+        </div>
+
+        <!-- Submit & Reset Buttons -->
+        <button type="submit" class="btn btn-primary" style="padding: 8px 14px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            Apply Filters
+        </button>
+
+        {% if start_date or end_date or selected_category or search %}
+            <a href="{{ url_for('expenses_list') }}" class="btn btn-secondary" style="padding: 8px 14px;">
+                Reset
+            </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Filter Summary Strip (Acceptance Criteria: Totals must match filtered expense records) -->
+<div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <div>
+            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em;">Filtered Total:</span>
+            <div style="font-size: 20px; font-weight: 800; color: var(--primary);">{{ "%.2f"|format(filtered_total) }}</div>
+        </div>
+        <div style="border-left: 1px solid var(--border-color); padding-left: 20px;">
+            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em;">Matching Records:</span>
+            <div style="font-size: 20px; font-weight: 800; color: var(--text-main);">{{ filtered_count }}</div>
+        </div>
+        <div style="border-left: 1px solid var(--border-color); padding-left: 20px;">
+            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em;">Average Amount:</span>
+            <div style="font-size: 20px; font-weight: 800; color: var(--text-main);">{{ "%.2f"|format(filtered_avg) }}</div>
+        </div>
+    </div>
+    <div>
+        <span style="font-size: 12px; color: var(--text-muted);">
+            {% if start_date or end_date or selected_category or search %}
+                Filtered view active
+            {% else %}
+                Showing all lifetime records
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+<!-- Expenses Table Card -->
+<div class="card-section">
+    <div class="section-header">
+        <h3 class="section-title">Expense Transactions</h3>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('openAddExpenseModal').click()" style="font-size: 12px; padding: 7px 14px;">
+            + Add Expense
+        </button>
+    </div>
+
+    {% if expenses %}
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th style="width: 120px;">Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Payment Method</th>
+                    <th style="text-align: right;">Amount</th>
+                    <th style="text-align: center; width: 100px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exp in expenses %}
+                <tr>
+                    <td style="color: var(--text-muted); font-size: 13px; font-weight: 500;">
+                        {{ exp.expense_date }}
+                    </td>
+                    <td>
+                        <strong style="color: var(--text-main);">{{ exp.description }}</strong>
+                    </td>
+                    <td>
+                        <span class="badge-category">{{ exp.category_name }}</span>
+                    </td>
+                    <td>
+                        <span class="badge-method">{{ exp.payment_method }}</span>
+                    </td>
+                    <td style="text-align: right;" class="amount-text">
+                        {{ "%.2f"|format(exp.amount) }}
+                    </td>
+                    <td style="text-align: center;">
+                        <div style="display: inline-flex; align-items: center; gap: 6px;">
+                            <!-- Edit Button triggers Edit Modal -->
+                            <button type="button" class="btn-icon edit btn-edit-expense" data-id="{{ exp.expense_id }}" title="Edit Expense">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </button>
+                            <!-- Delete Form -->
+                            <form action="{{ url_for('delete_expense', expense_id=exp.expense_id) }}" method="POST" class="delete-expense-form" style="display: inline;">
+                                <button type="submit" class="btn-icon delete" title="Delete Expense">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </div>
+        <h4 class="empty-title">No Matching Expenses Found</h4>
+        <p class="empty-desc">No expense records match your current filter parameters. Try clearing the filter or record a new expense.</p>
+        <div style="display: flex; gap: 10px;">
+            {% if start_date or end_date or selected_category or search %}
+                <a href="{{ url_for('expenses_list') }}" class="btn btn-secondary">Clear Filters</a>
+            {% endif %}
+            <button type="button" class="btn btn-primary" onclick="document.getElementById('openAddExpenseModal').click()">
+                + Add Expense
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

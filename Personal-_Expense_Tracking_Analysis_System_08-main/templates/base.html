@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Personal Expense Tracking and Analysis System{% endblock %}</title>
+    <!-- Modern Typography Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo" aria-label="Rupee symbol">₹</div>
+                <div class="sidebar-title">
+                    <h1>ExpenseTracker</h1>
+                    <span>Analysis System</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-menu">
+                <div class="nav-label">Navigation</div>
+                <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('expenses_list') }}" class="nav-link {% if request.endpoint == 'expenses_list' %}active{% endif %}">
+                    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                    Expenses Ledger
+                </a>
+                <a href="{{ url_for('analytics_view') }}" class="nav-link {% if request.endpoint == 'analytics_view' %}active{% endif %}">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    Data Analytics
+                </a>
+                <a href="{{ url_for('monthly_reports') }}" class="nav-link {% if request.endpoint == 'monthly_reports' %}active{% endif %}">
+                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Monthly Reports
+                </a>
+
+                <div class="nav-label" style="margin-top: 14px;">Master Data</div>
+                <a href="{{ url_for('categories_view') }}" class="nav-link {% if request.endpoint == 'categories_view' %}active{% endif %}">
+                    <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    Categories
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="db-pill">
+                    <span class="db-dot"></span>
+                    <span>{{ db_status.engine }}</span>
+                </div>
+                <div style="font-size: 11px; color: #94a3b8;">
+                    Personal Expense Tracker &copy; {{ current_year }}
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            <!-- Top Header Bar -->
+            <header class="top-header">
+                <div class="header-title">
+                    <h2>{% block page_title %}Personal Expense Dashboard{% endblock %}</h2>
+                    <p>{% block page_subtitle %}Academic Project &bull; Record, Analyze, and Understand Spending{% endblock %}</p>
+                </div>
+                <div class="header-actions">
+                    <button type="button" class="btn btn-secondary theme-toggle" data-theme-toggle aria-label="Switch color theme">🌙 Dark mode</button>
+                    {% if is_demo %}<span class="demo-badge">Sample demo</span>{% endif %}
+                    <form method="post" action="{{ url_for('logout') }}" style="display:inline">
+                        <button type="submit" class="btn btn-secondary logout-btn">Log out</button>
+                    </form>
+                    {% if not is_demo %}<button type="button" class="btn btn-primary" id="openAddExpenseModal">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Add Expense
+                    </button>{% endif %}
+                    {% block extra_header_actions %}{% endblock %}
+                </div>
+            </header>
+
+            <!-- Page Body -->
+            <div class="content-body">
+                {% if is_demo %}<div class="demo-notice"><strong>Read-only demo</strong><span>You’re exploring with sample data. Nothing here is saved to an account.</span><a href="{{ url_for('exit_demo') }}">Exit demo</a></div>{% endif %}
+                <!-- Flash Messages Banner -->
+                <div class="flash-messages">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">
+                                    <span>{{ message }}</span>
+                                    <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Reusable Add Expense Modal -->
+    {% if not is_demo %}<div class="modal-backdrop" id="addExpenseModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3 class="modal-title">Record New Expense</h3>
+                <button class="modal-close" id="closeAddExpenseModal">&times;</button>
+            </div>
+            <form action="{{ url_for('add_expense') }}" method="POST" class="validate-expense-form">
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Expense Date *</label>
+                            <input type="date" name="expense_date" class="form-input" required value="{{ today_date }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Amount (₹) *</label>
+                            <input type="number" step="0.01" min="0.01" name="amount" class="form-input" placeholder="e.g. 450.00" required>
+                            <span class="form-hint">Must be strictly greater than 0</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Category *</label>
+                        <select name="category_id" class="form-select" required>
+                            <option value="" disabled selected>-- Select Category --</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.category_id }}">{{ cat.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description *</label>
+                        <input type="text" name="description" class="form-input" placeholder="e.g. Weekly grocery shopping" required maxlength="255">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Payment Method *</label>
+                        <select name="payment_method" class="form-select" required>
+                            <option value="UPI">UPI / Mobile Payment</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Debit Card">Debit Card</option>
+                            <option value="Net Banking">Net Banking</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelAddExpenseModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Expense</button>
+                </div>
+            </form>
+        </div>
+    </div>{% endif %}
+
+    <!-- Reusable Edit Expense Modal -->
+    {% if not is_demo %}<div class="modal-backdrop" id="editExpenseModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Expense</h3>
+                <button class="modal-close" id="closeEditExpenseModal">&times;</button>
+            </div>
+            <form action="" method="POST" id="editExpenseForm" class="validate-expense-form">
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Expense Date *</label>
+                            <input type="date" name="expense_date" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Amount *</label>
+                            <input type="number" step="0.01" min="0.01" name="amount" class="form-input" required>
+                            <span class="form-hint">Must be strictly greater than 0</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Category *</label>
+                        <select name="category_id" class="form-select" required>
+                            {% for cat in categories %}
+                                <option value="{{ cat.category_id }}">{{ cat.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description *</label>
+                        <input type="text" name="description" class="form-input" required maxlength="255">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Payment Method *</label>
+                        <select name="payment_method" class="form-select" required>
+                            <option value="UPI">UPI / Mobile Payment</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Debit Card">Debit Card</option>
+                            <option value="Net Banking">Net Banking</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelEditExpenseModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>{% endif %}
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

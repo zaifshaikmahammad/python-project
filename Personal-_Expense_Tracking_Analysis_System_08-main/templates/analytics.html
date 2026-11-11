@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Data Analytics &bull; Personal Expense Tracking and Analysis System{% endblock %}
+{% block page_title %}Expense Analytics{% endblock %}
+{% block page_subtitle %}Clear visual insights into your spending patterns{% endblock %}
+
+{% block content %}
+<!-- Highlight Banner: Highest Spending Category -->
+{% if analysis.highest_category %}
+<div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; border-radius: var(--radius-lg); padding: 24px 28px; margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; box-shadow: var(--shadow-md);">
+    <div>
+        <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #38bdf8; font-weight: 700;">Key Spending Insight</span>
+        <h3 style="font-size: 22px; font-weight: 800; margin-top: 4px; color: #ffffff;">
+            Highest Expenditure: <span style="color: #60a5fa;">{{ analysis.highest_category.name }}</span>
+        </h3>
+        <p style="font-size: 13px; color: #94a3b8; margin-top: 4px;">
+            Accounts for <strong>{{ analysis.highest_category.percentage }}%</strong> of your total recorded spending with <strong>{{ "%.2f"|format(analysis.highest_category.amount) }}</strong> across {{ analysis.highest_category.count }} transactions.
+        </p>
+    </div>
+    <div style="background: rgba(255, 255, 255, 0.08); padding: 12px 20px; border-radius: var(--radius-md); border: 1px solid rgba(255, 255, 255, 0.12); text-align: right;">
+        <span style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 600;">Category Total</span>
+        <div style="font-size: 22px; font-weight: 800; color: #ffffff;">{{ "%.2f"|format(analysis.highest_category.amount) }}</div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Matplotlib Charts Section -->
+<div class="charts-grid">
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Category-Wise Spending Breakdown</h3>
+            <span class="chart-badge">Matplotlib Donut Chart</span>
+        </div>
+        <div class="chart-image-wrap">
+            <img src="{{ analysis.pie_chart }}" alt="Category Pie Chart">
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Month-Wise Expenditure Comparison</h3>
+            <span class="chart-badge">Matplotlib Bar Chart</span>
+        </div>
+        <div class="chart-image-wrap">
+            <img src="{{ analysis.bar_chart }}" alt="Monthly Bar Chart">
+        </div>
+    </div>
+</div>
+
+<!-- Pandas Grouping Tables: Category Breakdown & Monthly Totals -->
+<div style="display: grid; grid-template-columns: 3fr 2fr; gap: 24px;">
+    <!-- Pandas Category Breakdown Table -->
+    <div class="card-section">
+        <div class="section-header">
+            <div>
+                <h3 class="section-title">Category-Wise Expenditure Breakdown</h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Aggregated using Pandas <code>groupby('category_name')</code></p>
+            </div>
+            <span class="chart-badge" style="background: #fdf2f8; color: #9d174d;">Pandas GroupBy</span>
+        </div>
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Transactions</th>
+                        <th style="text-align: right;">Total Amount</th>
+                        <th style="text-align: right;">Percentage Share</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in analysis.category_breakdown %}
+                    <tr>
+                        <td>
+                            <strong style="color: var(--text-main);">{{ cat.category_name }}</strong>
+                        </td>
+                        <td>{{ cat.count }}</td>
+                        <td style="text-align: right;" class="amount-text">{{ "%.2f"|format(cat.total_amount) }}</td>
+                        <td style="text-align: right;">
+                            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
+                                <div class="progress-bar-wrap" style="width: 70px; margin: 0;">
+                                    <div class="progress-bar-fill" style="width: {{ cat.percentage }}%;"></div>
+                                </div>
+                                <span style="font-weight: 700; font-size: 12px;">{{ cat.percentage }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pandas Monthly Expense Totals Table -->
+    <div class="card-section">
+        <div class="section-header">
+            <div>
+                <h3 class="section-title">Monthly Expense Totals</h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Aggregated using Pandas <code>groupby('month_year')</code></p>
+            </div>
+            <span class="chart-badge" style="background: #f0fdf4; color: #166534;">Monthly Aggregation</span>
+        </div>
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Transactions</th>
+                        <th style="text-align: right;">Total Spent</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in analysis.monthly_totals %}
+                    <tr>
+                        <td><strong>{{ m.month_name }}</strong></td>
+                        <td>{{ m.count }}</td>
+                        <td style="text-align: right;" class="amount-text">{{ "%.2f"|format(m.total_amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Methods Breakdown Table -->
+<div class="card-section">
+    <div class="section-header">
+        <h3 class="section-title">Payment Method Distribution</h3>
+        <span class="chart-badge">Payment Ledger</span>
+    </div>
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Payment Method</th>
+                    <th>Transactions Count</th>
+                    <th style="text-align: right;">Total Spent</th>
+                    <th style="text-align: right;">Share</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in analysis.payment_breakdown %}
+                <tr>
+                    <td><span class="badge-method" style="font-size: 12px; padding: 4px 10px;">{{ p.method }}</span></td>
+                    <td>{{ p.count }}</td>
+                    <td style="text-align: right;" class="amount-text">{{ "%.2f"|format(p.total_amount) }}</td>
+                    <td style="text-align: right; font-weight: 600;">{{ p.percentage }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
